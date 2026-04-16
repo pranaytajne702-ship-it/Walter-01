@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>HTML5 APIs Demo</title>
+        <style>
+            body {
+                 font-family: Arial,  sans-serif;
+                 margin: 20px;
+            }
+            #dragBox, #dropZone {
+                width: 200px;
+                height: 100px;
+                border: 2px dashed #333;
+                margin: 10px;
+                padding: 10px;
+                text-align: center;
+
+
+            }
+            #dragBox {
+                background-color: lightblue;
+                cursor: grab;
+            }
+
+            #dropZone {
+                background-color: lightgrey;
+            }
+            button {
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>HTML5 API Demo</h1>
+        <h2>1. Drag & Drop</h2>
+        <div id="dragBox" draggable="true">Drag me</div>
+        <div id="dropZone">Drop here</div>
+        <h2>2.Geolocation</h2>
+        <button onclick="getlocation()">Get My Location</button>
+        <p id="locationOutput">Location will apper here...</p>
+        <h2>3. Web Storage (localStorage)</h2>
+        <input type="text" id="storageInput" placeholder="Enter something">
+        <button onclick="saveData()">Save</button>
+        <button onclick="loadData()">Load</button>
+        <p id="storageOutput"></p>
+        <script>
+            const dragBox = document.getElementById("dragBox");
+            const dropZone = document.getElementById("dropZone");
+            dragBox.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text", e.target.id);
+            });
+            dropZone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+            });
+            dropZone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                const data = e.dataTransfer.getData("text");
+                dropZone.appendChild( document.getElementById(data));
+            });
+
+            function Geolocation() {
+                const output = document.getElementById("locationOutput");
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        
+                        output.innerHTML = "Latitude: " +position.coords.latitude 
+                        + "<br>Longitude: " + position.coords.longitude;
+                    }, () => {
+                        output.innerHTML = "Unable to retrieve your location.";
+                    });
+                } else {
+                    output.innerHTML = "Geolocation is not supported.";
+                }
+            }
+                function saveData() {
+                    const input = document.getElementById("storageInput").value;
+                    localStorage.setItem("myData", input);
+                    alert("Data saved!");
+                }
+                function loadData() {
+                    
+                    const data = localStorage.getItem("myData");
+                    document.getElementById("storageOutput").innerHTML = data ? "Stored data: " + data : "No data found.";
+                    
+            }
+        </script>
+    </body>
+</html>
