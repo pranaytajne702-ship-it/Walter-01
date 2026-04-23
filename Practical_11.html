@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, intial-scale=1.0">
+        <title>Responsive CSS3 Webpage</title>
+        <!--Google Font-->
+        <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+        <!--Icons-->
+        <link rel="stylesheet" href="https://cdnjs.cloudfare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            /*Global Style 8/
+            body{
+            margin:0;
+            font-family:'Poppins' ,sans-serif;
+            background:#f4f4f4;
+            }
+            /*Navigation Bar*/
+            .navbar{
+                background:#333;
+                color:white;
+                display:flex;
+                justify-content:space-between;
+                padding:15px 30px;
+            }
+            .navbar a{
+                color:white;
+                text-decoration:none;
+                margin:0 10px;
+            }
+            /*Header*/
+            header{
+                text-align: center;
+                padding: 50px;
+                background: linear-gradient(120deg,#4facfe,#00f2fe);
+                color: white;
+            }
+            /*Multiple Column Section*/
+            .content{
+                column-count: 3;
+                column-gap: 30px;
+                padding: 30px;
+            }
+            /*Cards*/
+            .services{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 20px;
+                padding: 20px;
+            }
+            .card{
+                background: white;
+                padding: 20px;
+                width: 250px;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                transition: transform 0.4s;
+            }
+            /*Transformations*/
+            .card:hover{
+                transform: translateY(-10px) scale(1.05);
+            }
+            /*Icons*/
+            .card i{
+                font-size: 40px;
+                color: #4facfe;
+                margin-bottom: 10px;
+            }
+            /*Animation*/
+            @keyframes fadeIn{
+                from{opacity:0;}
+                to{opacity:1;}
+            }
+            .card{
+                animation: fadeIn 2s;
+            }
+            /*Responsive*/
+            @media(max-width:900px){
+                .content{
+                    column-count: 2;
+                }
+            }
+            @media(max width:600px){
+                .contect{
+                    column-count: 1;
+                }
+                .navbar{
+                    flex-direction: column;
+                    text-align: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!--Navbar-->
+        <div class="navbar">
+            <div><b>MyWebsite</b></div>
+            <div>
+                <a href="'#">Home</a>
+                <a href="#">Services</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+        <!--Header-->
+        <header>
+            <h1>Responsive CSS3 Webpage</h1>
+            <p>Using Columns, Icons, Animations and Transformations</p>
+        </header>
+        <!--Multiple Columns Text-->
+        <div class="contect">
+            <p>
+                CSS3 provides many modern features to design responsive and interactive websites. Developers can use flexible layouts, animations, transformations and fonts to create visually appealing web pages.
+            </p>
+            <p>
+                Responsive design ensures that a website works properly on different screen sizes such as mobile phones, tablets and desktops. Media queries help adjust layouts based on screen width. 
+            </p>
+            <p>
+                Icons, fonts and visual effects improve user experience and make the interface more engaging and professional.
+            </p>
+        </div>
+        <!--Cards Section-->
+        <div class="services">
+            <div class="card">
+                <i class="fas fa-code"></i>
+                <h3>Web Development</h3>
+                <p>Building modern and responsive websites.</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-paint-brush"></i>
+                <h3>Web Design</h3>
+                <p>Creative and attractive UI designs.</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Mobile Friendly</h3>
+                <p>Responsive layouts for all devices.</p>
+            </div>
+        </div>
+    </body>
+</html>
