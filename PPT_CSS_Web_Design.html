@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Sports Tournament</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color: white;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        text-align: center;
+        margin-bottom: 30px;
+        opacity: 0.8;
+    }
+
+    .container {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .left, .right {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .card {
+        background: rgba(0,0,0,0.7);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        transition: 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    ul {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+
+    ul li {
+        margin-bottom: 8px;
+    }
+
+    .prize li {
+        list-style: none;
+        background: rgba(255,255,255,0.1);
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+
+    .prize li:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border: none;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input:focus {
+        box-shadow: 0 0 5px #00ffcc;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(45deg, #00c853, #00e676);
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        transform: scale(1.03);
+        background: linear-gradient(45deg, #00e676, #00c853);
+    }
+
+    h2 {
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Ultimate E-Sports Tournament</h1>
+<p class="subtitle">Register your team and compete for glory!</p>
+
+<div class="container">
+
+    <div class="left">
+        <div class="card">
+            <h2>Tournament Rules</h2>
+            <ul>
+                <li>Each team must have 5 members.</li>
+                <li>No cheating or unfair software.</li>
+                <li>Respect all players and organizers.</li>
+                <li>Matches will follow knockout format.</li>
+                <li>Decision of judges is final.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Prize Pool</h2>
+            <ul class="prize">
+                <li>🥇 1st Place - ₹50,000</li>
+                <li>🥈 2nd Place - ₹25,000</li>
+                <li>🥉 3rd Place - ₹10,000</li>
+                <li>🏆 MVP Award - ₹5,000</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="card">
+            <h2>Team Registration</h2>
+
+            <input type="text" placeholder="Team Name">
+            <input type="text" placeholder="Captain Name">
+            <input type="email" placeholder="Captain Email">
+
+            <h3>Team Members</h3>
+
+            <input type="text" placeholder="Member 1">
+            <input type="text" placeholder="Member 2">
+            <input type="text" placeholder="Member 3">
+            <input type="text" placeholder="Member 4">
+            <input type="text" placeholder="Member 5">
+
+            <button>Register Team</button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
