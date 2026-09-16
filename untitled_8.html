@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Registration Form</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f2f2f2; }
+  .form-container {
+    max-width: 400px; margin: 40px auto; background:#fff;
+    padding: 25px; border-radius: 8px; box-shadow: 0 0 10px #ccc;
+  }
+  h2 { text-align: center; }
+  label { display:block; margin-top: 15px; font-weight: bold; }
+  input { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+  .error { color: red; font-size: 13px; }
+  button {
+    margin-top: 20px; width: 100%; padding: 10px;
+    background: #007bff; color: #fff; border:none; border-radius: 5px; cursor: pointer;
+  }
+  button:hover { background:#0056b3; }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Student Registration Form</h2>
+  <form id="registrationForm" novalidate>
+    <label>Full Name</label>
+    <input type="text" id="name">
+    <span class="error" id="nameError"></span>
+
+    <label>Email</label>
+    <input type="text" id="email">
+    <span class="error" id="emailError"></span>
+
+    <label>Password</label>
+    <input type="password" id="password">
+    <span class="error" id="passwordError"></span>
+
+    <label>Mobile Number</label>
+    <input type="text" id="mobile">
+    <span class="error" id="mobileError"></span>
+
+    <button type="submit">Register</button>
+  </form>
+</div>
+
+<script>
+document.getElementById("registrationForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  let valid = true;
+
+  // Clear previous errors
+  document.getElementById("nameError").textContent = "";
+  document.getElementById("emailError").textContent = "";
+  document.getElementById("passwordError").textContent = "";
+  document.getElementById("mobileError").textContent = "";
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+
+  // Name check
+  if (name === "") {
+    document.getElementById("nameError").textContent = "Name is required.";
+    valid = false;
+  }
+
+  // Email format check
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    document.getElementById("emailError").textContent = "Enter a valid email address.";
+    valid = false;
+  }
+
+  // Password length check
+  if (password.length < 8) {
+    document.getElementById("passwordError").textContent = "Password must be at least 8 characters.";
+    valid = false;
+  }
+
+  // Mobile number check (10 digits)
+  const mobilePattern = /^[0-9]{10}$/;
+  if (!mobilePattern.test(mobile)) {
+    document.getElementById("mobileError").textContent = "Enter a valid 10-digit mobile number.";
+    valid = false;
+  }
+
+  if (valid) {
+    alert("Registration Successful!");
+    document.getElementById("registrationForm").reset();
+  }
+});
+</script>
+
+</body>
+</html>
