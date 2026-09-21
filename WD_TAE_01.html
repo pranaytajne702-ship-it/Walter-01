@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Character Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c1a16;
+    --panel: #26231d;
+    --panel-raised: #2f2b23;
+    --line: #453f34;
+    --parchment: #e9e1cd;
+    --parchment-dim: #b8ae96;
+    --brass: #c19a49;
+    --brass-dim: #8a6f37;
+    --moss: #6f8a5c;
+    --rust: #a34632;
+    --rust-bright: #d1583d;
+    --radius: 3px;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --ink: #f1ece0;
+      --panel: #ffffff;
+      --panel-raised: #f8f4ea;
+      --line: #d8cfb8;
+      --parchment: #2a2620;
+      --parchment-dim: #6b6250;
+      --brass: #93732f;
+      --brass-dim: #b7924a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #1c1a16;
+    --panel: #26231d;
+    --panel-raised: #2f2b23;
+    --line: #453f34;
+    --parchment: #e9e1cd;
+    --parchment-dim: #b8ae96;
+    --brass: #c19a49;
+    --brass-dim: #8a6f37;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    padding: 28px 20px 60px;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Header ---------- */
+  header.sheet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--brass-dim);
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+  }
+  .identity {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 260px;
+  }
+  .identity input.name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4vw, 40px);
+    background: none;
+    border: none;
+    color: var(--parchment);
+    padding: 0;
+    width: 100%;
+  }
+  .identity input.name:focus { outline: none; }
+  .identity input.name::placeholder { color: var(--parchment-dim); }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--parchment-dim);
+  }
+  .meta-row .field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-row label { white-space: nowrap; }
+  .meta-row input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 2px 2px 3px;
+    width: 84px;
+  }
+  .meta-row input:focus { outline: none; border-color: var(--brass); }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+  button.ghost {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--parchment-dim);
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  button.ghost:hover { border-color: var(--brass); color: var(--brass); }
+
+  /* ---------- Layout ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr 1.3fr;
+    gap: 18px;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .panel h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: .02em;
+    margin: 0 0 14px;
+    color: var(--brass);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+  }
+
+  /* ---------- Abilities ---------- */
+  .abilities {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .ability {
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .ability .label {
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--parchment-dim);
+  }
+  .ability .score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .ability input.score {
+    width: 42px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--parchment);
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    text-align: center;
+    padding: 0 0 2px;
+  }
+  .ability input.score:focus { outline: none; border-color: var(--brass); }
+  .ability .mod {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--brass);
+    min-width: 30px;
+    text-align: right;
+  }
+
+  .derived {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .derived .stat {
+    text-align: center;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 6px;
+  }
+  .derived .stat .num {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--parchment);
+  }
+  .derived .stat .cap {
+    font-size: 10px;
+    color: var(--parchment-dim);
+    margin-top: 2px;
+    letter-spacing: .04em;
+  }
+
+  /* ---------- Health ---------- */
+  .hp-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .hp-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--panel-raised);
+    color: var(--parchment);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .hp-btn:hover { border-color: var(--brass); color: var(--brass); }
+  .hp-values {
+    font-family: 'Fraunces', serif;
+    font-size: 34px;
+    text-align: center;
+    min-width: 110px;
+  }
+  .hp-values .cur { color: var(--parchment); }
+  .hp-values .slash { color: var(--parchment-dim); margin: 0 4px; font-size: 22px; }
+  .hp-values input.max-hp {
+    width: 46px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--parchment-dim);
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    text-align: center;
+  }
+  .hp-values input.max-hp:focus { outline: none; border-color: var(--brass); }
+
+  .hp-bar-track {
+    height: 14px;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .hp-bar-fill {
+    height: 100%;
+    background: var(--moss);
+    transition: width .25s ease, background .25s ease;
+  }
+  .hp-caption {
+    text-align: center;
+    font-size: 11px;
+    color: var(--parchment-dim);
+    margin-bottom: 16px;
+    letter-spacing: .03em;
+  }
+
+  .sub-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .sub-field {
+    flex: 1;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .sub-field label {
+    display: block;
+    font-size: 10px;
+    color: var(--parchment-dim);
+    margin-bottom: 4px;
+    letter-spacing: .04em;
+  }
+  .sub-field input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--parchment);
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    text-align: center;
+  }
+  .sub-field input:focus { outline: none; }
+
+  .status-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .status-chip {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--parchment-dim);
+    background: transparent;
+    cursor: pointer;
+  }
+  .status-chip.active {
+    border-color: var(--rust-bright);
+    color: var(--rust-bright);
+    background: rgba(163,70,50,0.12);
+  }
+
+  /* ---------- Equipment ---------- */
+  .add-item-form {
+    display: grid;
+    grid-template-columns: 1fr 60px 34px;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .add-item-form input {
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 8px 9px;
+    width: 100%;
+  }
+  .add-item-form input:focus { outline: none; border-color: var(--brass); }
+  .add-item-form button {
+    background: var(--brass-dim);
+    border: none;
+    border-radius: var(--radius);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .add-item-form button:hover { background: var(--brass); }
+
+  .equip-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .equip-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+  }
+  .equip-item.equipped { border-color: var(--brass-dim); }
+  .equip-item .eq-check {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--brass);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .equip-item .eq-name {
+    flex: 1;
+    font-size: 13.5px;
+    min-width: 0;
+    word-break: break-word;
+  }
+  .equip-item.equipped .eq-name { color: var(--brass); }
+  .equip-item .eq-weight {
+    font-size: 11px;
+    color: var(--parchment-dim);
+    width: 46px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .equip-item .eq-remove {
+    background: none;
+    border: none;
+    color: var(--parchment-dim);
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+    padding: 2px 4px;
+  }
+  .equip-item .eq-remove:hover { color: var(--rust-bright); }
+  .empty-note {
+    font-size: 12.5px;
+    color: var(--parchment-dim);
+    font-style: italic;
+    padding: 10px 2px;
+  }
+
+  .weight-summary {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--parchment-dim);
+  }
+  .weight-summary strong { color: var(--parchment); }
+
+  .gold-row {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+  }
+  .gold-row label { font-size: 12px; color: var(--parchment-dim); }
+  .gold-row input {
+    width: 90px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--brass);
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    text-align: right;
+  }
+  .gold-row input:focus { outline: none; }
+
+  /* ---------- Notes ---------- */
+  textarea.notes {
+    width: 100%;
+    min-height: 90px;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    padding: 10px;
+    resize: vertical;
+    margin-top: 14px;
+  }
+  textarea.notes:focus { outline: none; border-color: var(--brass); }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+  .footer-note {
+    text-align: center;
+    color: var(--parchment-dim);
+    font-size: 11px;
+    margin-top: 24px;
+    letter-spacing: .03em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="sheet">
+    <div class="identity">
+      <input class="name" id="charName" placeholder="Unnamed Adventurer" />
+      <div class="meta-row">
+        <div class="field"><label>Class</label><input id="charClass" placeholder="Wanderer" /></div>
+        <div class="field"><label>Level</label><input id="charLevel" type="number" min="1" value="1" style="width:44px" /></div>
+        <div class="field"><label>Race</label><input id="charRace" placeholder="—" /></div>
+        <div class="field"><label>Background</label><input id="charBg" placeholder="—" style="width:120px" /></div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="ghost" id="resetBtn">Reset sheet</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ABILITIES -->
+    <section class="panel">
+      <h2>Abilities</h2>
+      <div class="abilities" id="abilitiesGrid"></div>
+      <div class="derived">
+        <div class="stat"><div class="num" id="statAC">10</div><div class="cap">Armor Class</div></div>
+        <div class="stat"><div class="num" id="statInit">+0</div><div class="cap">Initiative</div></div>
+        <div class="stat"><div class="num" id="statSpeed">30</div><div class="cap">Speed (ft)</div></div>
+      </div>
+    </section>
+
+    <!-- HEALTH -->
+    <section class="panel">
+      <h2>Health &amp; Condition</h2>
+      <div class="hp-row">
+        <button class="hp-btn" id="hpMinus">−</button>
+        <div class="hp-values">
+          <span class="cur" id="hpCurrent">10</span><span class="slash">/</span><input class="max-hp" id="hpMax" type="number" value="10" min="1" />
+        </div>
+        <button class="hp-btn" id="hpPlus">+</button>
+      </div>
+      <div class="hp-bar-track"><div class="hp-bar-fill" id="hpBarFill" style="width:100%"></div></div>
+      <div class="hp-caption" id="hpCaption">Full health</div>
+
+      <div class="sub-row">
+        <div class="sub-field">
+          <label>Temp HP</label>
+          <input id="tempHp" type="number" min="0" value="0" />
+        </div>
+        <div class="sub-field">
+          <label>AC bonus</label>
+          <input id="acBonus" type="number" value="0" />
+        </div>
+      </div>
+
+      <label style="font-size:11px; color:var(--parchment-dim); display:block; margin-bottom:6px; letter-spacing:.04em;">Conditions</label>
+      <div class="status-toggles" id="statusToggles"></div>
+    </section>
+
+    <!-- EQUIPMENT -->
+    <section class="panel">
+      <h2>Equipment &amp; Inventory</h2>
+      <div class="add-item-form">
+        <input id="newItemName" placeholder="Add item…" />
+        <input id="newItemWeight" type="number" min="0" step="0.1" placeholder="lb" />
+        <button id="addItemBtn">+</button>
+      </div>
+      <ul class="equip-list" id="equipList"></ul>
+      <div class="weight-summary">
+        <span>Carried weight</span>
+        <strong id="totalWeight">0 lb</strong>
+      </div>
+      <div class="gold-row">
+        <label>Gold pieces</label>
+        <input id="goldAmount" type="number" min="0" value="0" />
+      </div>
+      <textarea class="notes" id="notes" placeholder="Notes, spells, quirks…"></textarea>
+    </section>
+
+  </div>
+
+  <div class="footer-note">Autosaves to this browser · nothing leaves your device</div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'ttrpg-character-sheet-v1';
+
+  const ABILITY_DEFS = [
+    { key: 'str', label: 'Strength' },
+    { key: 'dex', label: 'Dexterity' },
+    { key: 'con', label: 'Constitution' },
+    { key: 'int', label: 'Intelligence' },
+    { key: 'wis', label: 'Wisdom' },
+    { key: 'cha', label: 'Charisma' }
+  ];
+
+  const CONDITIONS = ['Blinded', 'Poisoned', 'Prone', 'Stunned', 'Frightened', 'Grappled', 'Exhausted'];
+
+  const defaultState = {
+    name: '', cls: '', level: 1, race: '', bg: '',
+    abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    baseAC: 10, acBonus: 0, speed: 30,
+    hpMax: 10, hpCurrent: 10, tempHp: 0,
+    conditions: [],
+    equipment: [], // {id, name, weight, equipped}
+    gold: 0,
+    notes: ''
+  };
+
+  let state = loadState();
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredCloneSafe(defaultState);
+      const parsed = JSON.parse(raw);
+      return Object.assign(structuredCloneSafe(defaultState), parsed, {
+        abilities: Object.assign({}, defaultState.abilities, parsed.abilities || {})
+      });
+    } catch (e) {
+      console.warn('Could not load saved character, starting fresh.', e);
+      return structuredCloneSafe(defaultState);
+    }
+  }
+
+  function structuredCloneSafe(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('Could not save character.', e);
+    }
+  }
+
+  function mod(score) {
+    return Math.floor((score - 10) / 2);
+  }
+  function fmtMod(n) {
+    return (n >= 0 ? '+' : '') + n;
+  }
+
+  // ---------- Abilities ----------
+  const abilitiesGrid = document.getElementById('abilitiesGrid');
+  function renderAbilities() {
+    abilitiesGrid.innerHTML = '';
+    ABILITY_DEFS.forEach(def => {
+      const score = state.abilities[def.key];
+      const wrap = document.createElement('div');
+      wrap.className = 'ability';
+      wrap.innerHTML = `
+        <div>
+          <div class="label">${def.label}</div>
+          <div class="score-row">
+            <input class="score" type="number" min="1" max="30" value="${score}" data-key="${def.key}" />
+          </div>
+        </div>
+        <div class="mod">${fmtMod(mod(score))}</div>
+      `;
+      abilitiesGrid.appendChild(wrap);
+    });
+    abilitiesGrid.querySelectorAll('input.score').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const key = e.target.dataset.key;
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val)) val = 10;
+        state.abilities[key] = val;
+        renderAbilities();
+        renderDerived();
+        save();
+      });
+    });
+  }
+
+  function renderDerived() {
+    const dexMod = mod(state.abilities.dex);
+    document.getElementById('statAC').textContent = state.baseAC + Number(state.acBonus || 0) + dexMod;
+    document.getElementById('statInit').textContent = fmtMod(dexMod);
+    document.getElementById('statSpeed').textContent = state.speed;
+  }
+
+  document.getElementById('acBonus').addEventListener('input', e => {
+    state.acBonus = parseInt(e.target.value, 10) || 0;
+    renderDerived();
+    save();
+  });
+
+  // ---------- Identity ----------
+  const nameEl = document.getElementById('charName');
+  const clsEl = document.getElementById('charClass');
+  const levelEl = document.getElementById('charLevel');
+  const raceEl = document.getElementById('charRace');
+  const bgEl = document.getElementById('charBg');
+
+  function renderIdentity() {
+    nameEl.value = state.name;
+    clsEl.value = state.cls;
+    levelEl.value = state.level;
+    raceEl.value = state.race;
+    bgEl.value = state.bg;
+  }
+  nameEl.addEventListener('input', e => { state.name = e.target.value; save(); });
+  clsEl.addEventListener('input', e => { state.cls = e.target.value; save(); });
+  levelEl.addEventListener('input', e => { state.level = parseInt(e.target.value, 10) || 1; save(); });
+  raceEl.addEventListener('input', e => { state.race = e.target.value; save(); });
+  bgEl.addEventListener('input', e => { state.bg = e.target.value; save(); });
+
+  // ---------- Health ----------
+  const hpCurrentEl = document.getElementById('hpCurrent');
+  const hpMaxEl = document.getElementById('hpMax');
+  const hpBarFill = document.getElementById('hpBarFill');
+  const hpCaption = document.getElementById('hpCaption');
+  const tempHpEl = document.getElementById('tempHp');
+
+  function clampHp() {
+    state.hpMax = Math.max(1, state.hpMax || 1);
+    state.hpCurrent = Math.max(0, Math.min(state.hpCurrent, state.hpMax));
+  }
+
+  function renderHealth() {
+    clampHp();
+    hpCurrentEl.textContent = state.hpCurrent;
+    hpMaxEl.value = state.hpMax;
+    tempHpEl.value = state.tempHp || 0;
+
+    const pct = Math.round((state.hpCurrent / state.hpMax) * 100);
+    hpBarFill.style.width = pct + '%';
+
+    let color = 'var(--moss)';
+    let caption = 'Full health';
+    if (state.hpCurrent <= 0) {
+      color = 'var(--rust)';
+      caption = 'Down';
+    } else if (pct <= 25) {
+      color = 'var(--rust-bright)';
+      caption = 'Critical';
+    } else if (pct <= 50) {
+      color = 'var(--brass)';
+      caption = 'Wounded';
+    } else if (pct < 100) {
+      color = 'var(--moss)';
+      caption = 'Holding steady';
+    }
+    hpBarFill.style.background = color;
+    hpCaption.textContent = caption + (state.tempHp > 0 ? ` · +${state.tempHp} temp HP` : '');
+  }
+
+  document.getElementById('hpMinus').addEventListener('click', () => {
+    if (state.tempHp > 0) {
+      state.tempHp -= 1;
+    } else {
+      state.hpCurrent -= 1;
+    }
+    renderHealth();
+    save();
+  });
+  document.getElementById('hpPlus').addEventListener('click', () => {
+    state.hpCurrent += 1;
+    renderHealth();
+    save();
+  });
+  hpMaxEl.addEventListener('input', e => {
+    state.hpMax = parseInt(e.target.value, 10) || 1;
+    renderHealth();
+    save();
+  });
+  tempHpEl.addEventListener('input', e => {
+    state.tempHp = Math.max(0, parseInt(e.target.value, 10) || 0);
+    renderHealth();
+    save();
+  });
+
+  // ---------- Conditions ----------
+  const statusToggles = document.getElementById('statusToggles');
+  function renderConditions() {
+    statusToggles.innerHTML = '';
+    CONDITIONS.forEach(cond => {
+      const chip = document.createElement('button');
+      chip.className = 'status-chip' + (state.conditions.includes(cond) ? ' active' : '');
+      chip.textContent = cond;
+      chip.addEventListener('click', () => {
+        if (state.conditions.includes(cond)) {
+          state.conditions = state.conditions.filter(c => c !== cond);
+        } else {
+          state.conditions.push(cond);
+        }
+        renderConditions();
+        save();
+      });
+      statusToggles.appendChild(chip);
+    });
+  }
+
+  // ---------- Equipment ----------
+  const equipList = document.getElementById('equipList');
+  const totalWeightEl = document.getElementById('totalWeight');
+  const newItemName = document.getElementById('newItemName');
+  const newItemWeight = document.getElementById('newItemWeight');
+
+  function renderEquipment() {
+    equipList.innerHTML = '';
+    if (state.equipment.length === 0) {
+      const p = document.createElement('li');
+      p.className = 'empty-note';
+      p.textContent = 'No gear yet — add a weapon, armor, or trinket above.';
+      equipList.appendChild(p);
+    }
+    state.equipment.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'equip-item' + (item.equipped ? ' equipped' : '');
+      li.innerHTML = `
+        <input type="checkbox" class="eq-check" ${item.equipped ? 'checked' : ''} title="Equipped" />
+        <span class="eq-name">${escapeHtml(item.name)}</span>
+        <span class="eq-weight">${item.weight ? item.weight + ' lb' : ''}</span>
+        <button class="eq-remove" title="Remove">✕</button>
+      `;
+      li.querySelector('.eq-check').addEventListener('change', e => {
+        item.equipped = e.target.checked;
+        renderEquipment();
+        save();
+      });
+      li.querySelector('.eq-remove').addEventListener('click', () => {
+        state.equipment = state.equipment.filter(i => i.id !== item.id);
+        renderEquipment();
+        save();
+      });
+      equipList.appendChild(li);
+    });
+
+    const total = state.equipment.reduce((sum, i) => sum + (Number(i.weight) || 0), 0);
+    totalWeightEl.textContent = (Math.round(total * 10) / 10) + ' lb';
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function addItem() {
+    const name = newItemName.value.trim();
+    if (!name) return;
+    const weight = parseFloat(newItemWeight.value) || 0;
+    state.equipment.push({
+      id: 'item-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      name, weight, equipped: false
+    });
+    newItemName.value = '';
+    newItemWeight.value = '';
+    renderEquipment();
+    save();
+    newItemName.focus();
+  }
+  document.getElementById('addItemBtn').addEventListener('click', addItem);
+  newItemName.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
+  newItemWeight.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
+
+  // ---------- Gold & Notes ----------
+  const goldEl = document.getElementById('goldAmount');
+  const notesEl = document.getElementById('notes');
+  function renderMisc() {
+    goldEl.value = state.gold;
+    notesEl.value = state.notes;
+  }
+  goldEl.addEventListener('input', e => { state.gold = parseInt(e.target.value, 10) || 0; save(); });
+  notesEl.addEventListener('input', e => { state.notes = e.target.value; save(); });
+
+  // ---------- Reset ----------
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm('Reset the entire character sheet? This cannot be undone.')) {
+      state = structuredCloneSafe(defaultState);
+      renderAll();
+      save();
+    }
+  });
+
+  function renderAll() {
+    renderIdentity();
+    renderAbilities();
+    renderDerived();
+    renderHealth();
+    renderConditions();
+    renderEquipment();
+    renderMisc();
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
