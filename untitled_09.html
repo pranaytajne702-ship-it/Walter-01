@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Personal To-Do List</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .task-done span.task-text { text-decoration: line-through; color: #9ca3af; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-slate-100 min-h-screen">
+
+  <div class="max-w-xl mx-auto px-4 py-10">
+
+    <h1 class="text-3xl font-bold text-indigo-700 text-center mb-2">📝 My To-Do List</h1>
+    <p class="text-slate-500 text-center mb-6">Organize your daily academic & personal tasks</p>
+
+    <!-- Input row -->
+    <div class="flex gap-2 mb-6">
+      <input id="taskInput" type="text" placeholder="Enter a new task..."
+        class="flex-1 px-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+      <button onclick="addTask()"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition">
+        Add
+      </button>
+    </div>
+
+    <!-- Filter buttons -->
+    <div class="flex justify-center gap-2 mb-4 text-sm">
+      <button onclick="setFilter('all')" class="filter-btn px-3 py-1 rounded-full bg-indigo-600 text-white" data-filter="all">All</button>
+      <button onclick="setFilter('active')" class="filter-btn px-3 py-1 rounded-full bg-slate-200 text-slate-700" data-filter="active">Active</button>
+      <button onclick="setFilter('completed')" class="filter-btn px-3 py-1 rounded-full bg-slate-200 text-slate-700" data-filter="completed">Completed</button>
+    </div>
+
+    <!-- Task list -->
+    <ul id="taskList" class="space-y-2"></ul>
+
+    <!-- Footer -->
+    <div class="flex justify-between items-center mt-6 text-sm text-slate-500">
+      <span id="taskCount">0 tasks left</span>
+      <button onclick="clearCompleted()" class="text-red-500 hover:underline">Clear Completed</button>
+    </div>
+
+  </div>
+
+<script>
+  let tasks = [];
+  let currentFilter = 'all';
+
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (text === '') return;
+    tasks.push({ id: Date.now(), text: text, completed: false });
+    input.value = '';
+    render();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    render();
+  }
+
+  function toggleTask(id) {
+    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    render();
+  }
+
+  function clearCompleted() {
+    tasks = tasks.filter(t => !t.completed);
+    render();
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      if (btn.dataset.filter === filter) {
+        btn.className = 'filter-btn px-3 py-1 rounded-full bg-indigo-600 text-white';
+      } else {
+        btn.className = 'filter-btn px-3 py-1 rounded-full bg-slate-200 text-slate-700';
+      }
+    });
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('taskList');
+    list.innerHTML = '';
+
+    let filtered = tasks;
+    if (currentFilter === 'active') filtered = tasks.filter(t => !t.completed);
+    if (currentFilter === 'completed') filtered = tasks.filter(t => t.completed);
+
+    filtered.forEach(task => {
+      const li = document.createElement('li');
+      li.className = `flex items-center justify-between bg-white shadow-sm rounded-lg px-4 py-2 ${task.completed ? 'task-done' : ''}`;
+      li.innerHTML = `
+        <div class="flex items-center gap-3">
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})"
+            class="w-5 h-5 accent-indigo-600 cursor-pointer">
+          <span class="task-text">${escapeHtml(task.text)}</span>
+        </div>
+        <button onclick="deleteTask(${task.id})" class="text-red-400 hover:text-red-600 font-bold px-2">✕</button>
+      `;
+      list.appendChild(li);
+    });
+
+    const remaining = tasks.filter(t => !t.completed).length;
+    document.getElementById('taskCount').textContent = `${remaining} task${remaining !== 1 ? 's' : ''} left`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById('taskInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') addTask();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
