@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Invitation</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-pink-100 to-purple-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
+
+        <h1 class="text-3xl font-bold text-pink-600 mb-4">
+            ☕ Coffee Invitation
+        </h1>
+
+        <p class="text-gray-700 text-lg mb-4">
+            Hi,
+        </p>
+
+        <p class="text-gray-600 mb-6">
+            I enjoy talking with you and would like to know you better.
+            Would you like to join me for a coffee at
+            <span class="font-semibold text-pink-600">Cafe Elvora</span> sometime?
+        </p>
+
+        <div class="bg-pink-50 rounded-xl p-4 mb-6">
+            <p class="font-medium">📍 Location</p>
+            <p>Cafe Elvora</p>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="saveResponse('Yes')"
+                class="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition">
+                Yes ☕
+            </button>
+
+            <button onclick="saveResponse('Maybe')"
+                class="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition">
+                Maybe 🙂
+            </button>
+
+            <button onclick="saveResponse('No')"
+                class="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition">
+                No
+            </button>
+        </div>
+
+        <div id="result" class="mt-6 hidden">
+            <p class="font-semibold text-lg"></p>
+        </div>
+
+    </div>
+
+    <script>
+        function saveResponse(answer) {
+
+            localStorage.setItem("coffeeResponse", answer);
+
+            const result = document.getElementById("result");
+            result.classList.remove("hidden");
+
+            if(answer === "Yes"){
+                result.innerHTML =
+                    "<p class='text-green-600 font-bold'>Thank you! Looking forward to it ☕😊</p>";
+            }
+            else if(answer === "Maybe"){
+                result.innerHTML =
+                    "<p class='text-yellow-600 font-bold'>No worries, take your time 🙂</p>";
+            }
+            else{
+                result.innerHTML =
+                    "<p class='text-red-600 font-bold'>Thank you for being honest. I appreciate it.</p>";
+            }
+
+            console.log("Saved Response:", answer);
+        }
+    </script>
+
+</body>
+</html>
