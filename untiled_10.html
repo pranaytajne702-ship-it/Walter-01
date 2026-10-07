@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Paisa – Student Budget Tracker</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { ink: '#1f2a2e', moss: '#2f6f5e', paper: '#f3f6f4', coin: '#e9b44c', rust: '#c2543a' } } }
+    };
+  </script>
+
+  <style>
+    /* Custom styles that complement Tailwind utilities */
+    body { font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      border: 1px solid #dfe7e3;
+    }
+    .label {
+      display: block;
+      font-size: 0.8rem;
+      color: #5b6b66;
+      margin-bottom: 0.25rem;
+    }
+    .input {
+      width: 100%;
+      border: 1px solid #cdd8d3;
+      border-radius: 8px;
+      padding: 0.5rem 0.65rem;
+      background: #fff;
+      font-size: 0.95rem;
+    }
+    .input:focus,
+    button:focus-visible {
+      outline: 2px solid #2f6f5e;
+      outline-offset: 2px;
+    }
+    .row-new { animation: flash 1s ease-out; }
+    @keyframes flash { from { background: #fff4d6; } to { background: transparent; } }
+
+    .delete-btn { opacity: 0.5; transition: opacity 0.2s; }
+    li:hover .delete-btn, .delete-btn:focus-visible { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-paper text-ink min-h-screen">
+
+  <header class="bg-moss text-white">
+    <div class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold">Paisa</h1>
+        <p class="text-sm text-white/80">See where your monthly allowance actually goes.</p>
+      </div>
+      <button id="clearAll" class="text-sm border border-white/60 rounded-lg px-3 py-1.5 hover:bg-white/10">Clear all</button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Summary -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="Summary">
+      <div class="card"><p class="label">Balance</p><p id="balance" class="text-3xl font-bold">₹0</p></div>
+      <div class="card"><p class="label">Income</p><p id="income" class="text-3xl font-bold text-moss">₹0</p></div>
+      <div class="card"><p class="label">Spent</p><p id="expense" class="text-3xl font-bold text-rust">₹0</p></div>
+    </section>
+
+    <!-- Budget limit -->
+    <section class="card">
+      <div class="flex flex-wrap items-center gap-3 justify-between">
+        <label for="limit" class="font-semibold">Monthly spending limit (₹)</label>
+        <input id="limit" type="number" min="0" placeholder="e.g. 8000" class="input w-40" />
+      </div>
+      <div class="mt-3 h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div id="limitBar" class="h-full bg-moss transition-all duration-500" style="width:0%"></div>
+      </div>
+      <p id="limitText" class="text-sm mt-2 text-gray-600">Set a limit to track your spending.</p>
+    </section>
+
+    <div class="grid lg:grid-cols-5 gap-6">
+
+      <!-- Form -->
+      <section class="card lg:col-span-2 h-fit">
+        <h2 class="text-lg font-semibold mb-4">Add a transaction</h2>
+        <form id="form" class="space-y-3" novalidate>
+          <div>
+            <label for="title" class="label">Description</label>
+            <input id="title" class="input" placeholder="Canteen lunch" maxlength="40" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="amount" class="label">Amount (₹)</label>
+              <input id="amount" type="number" min="1" class="input" placeholder="120" />
+            </div>
+            <div>
+              <label for="type" class="label">Type</label>
+              <select id="type" class="input">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="category" class="label">Category</label>
+              <select id="category" class="input">
+                <option>Food</option><option>Travel</option><option>Books</option>
+                <option>Entertainment</option><option>Rent</option><option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="date" class="label">Date</label>
+              <input id="date" type="date" class="input" />
+            </div>
+          </div>
+          <p id="error" class="text-sm text-rust hidden" role="alert"></p>
+          <button class="w-full bg-moss text-white font-semibold rounded-lg py-2.5 hover:bg-ink transition-colors">Add transaction</button>
+        </form>
+      </section>
+
+      <!-- List + breakdown -->
+      <section class="lg:col-span-3 space-y-6">
+        <div class="card">
+          <h2 class="text-lg font-semibold mb-3">Spending by category</h2>
+          <div id="breakdown" class="space-y-2"></div>
+        </div>
+
+        <div class="card">
+          <div class="flex flex-wrap gap-3 items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold">Transactions</h2>
+            <div class="flex gap-2">
+              <input id="search" class="input w-36" placeholder="Search…" aria-label="Search transactions" />
+              <select id="filter" class="input w-32" aria-label="Filter by type">
+                <option value="all">All</option><option value="income">Income</option><option value="expense">Expenses</option>
+              </select>
+            </div>
+          </div>
+          <ul id="list" class="divide-y divide-gray-200"></ul>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="text-center text-xs text-gray-500 py-6">Data is saved in your browser only.</footer>
+
+  <script>
+    // ---------- State ----------
+    const STORE_KEY = 'paisa-data-v1';
+    let state = load() || { transactions: [], limit: 0 };
+    let lastAddedId = null;
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch { return null; }
+    }
+    function save() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch { /* storage unavailable */ }
+    }
+
+    // ---------- Add / delete ----------
+    $('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = $('title').value.trim();
+      const amount = parseFloat($('amount').value);
+      const date = $('date').value;
+
+      if (!title) return showError('Enter a description.');
+      if (!amount || amount <= 0) return showError('Enter an amount greater than 0.');
+      if (!date) return showError('Pick a date.');
+      showError('');
+
+      const t = {
+        id: Date.now(),
+        title, amount, date,
+        type: $('type').value,
+        category: $('category').value,
+      };
+      state.transactions.unshift(t);
+      lastAddedId = t.id;
+      save();
+      $('title').value = '';
+      $('amount').value = '';
+      render();
+    });
+
+    function showError(msg) {
+      const el = $('error');
+      el.textContent = msg;
+      el.classList.toggle('hidden', !msg);
+    }
+
+    $('list').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-id]');
+      if (!btn) return;
+      state.transactions = state.transactions.filter((t) => t.id !== Number(btn.dataset.id));
+      save();
+      render();
+    });
+
+    $('limit').addEventListener('input', (e) => {
+      state.limit = parseFloat(e.target.value) || 0;
+      save();
+      renderLimit(totals().expense);
+    });
+
+    $('clearAll').addEventListener('click', () => {
+      if (state.transactions.length && confirm('Delete all transactions? This cannot be undone.')) {
+        state = { transactions: [], limit: state.limit };
+        save();
+        render();
+      }
+    });
+
+    $('search').addEventListener('input', renderList);
+    $('filter').addEventListener('change', renderList);
+
+    // ---------- Calculations ----------
+    function totals() {
+      return state.transactions.reduce(
+        (acc, t) => { acc[t.type] += t.amount; return acc; },
+        { income: 0, expense: 0 }
+      );
+    }
+
+    // ---------- Rendering ----------
+    function render() {
+      const { income, expense } = totals();
+      $('income').textContent = fmt(income);
+      $('expense').textContent = fmt(expense);
+      const bal = income - expense;
+      $('balance').textContent = (bal < 0 ? '-' : '') + fmt(Math.abs(bal));
+      $('balance').classList.toggle('text-rust', bal < 0);
+      renderLimit(expense);
+      renderBreakdown();
+      renderList();
+    }
+
+    function renderLimit(expense) {
+      const bar = $('limitBar'), text = $('limitText');
+      if (!state.limit) {
+        bar.style.width = '0%';
+        text.textContent = 'Set a limit to track your spending.';
+        return;
+      }
+      const pct = Math.min(100, (expense / state.limit) * 100);
+      bar.style.width = pct + '%';
+      bar.className = 'h-full transition-all duration-500 ' +
+        (pct >= 100 ? 'bg-rust' : pct >= 75 ? 'bg-coin' : 'bg-moss');
+      const left = state.limit - expense;
+      text.textContent = left >= 0
+        ? `${Math.round(pct)}% used – ${fmt(left)} left this month.`
+        : `Over the limit by ${fmt(Math.abs(left))}.`;
+    }
+
+    function renderBreakdown() {
+      const sums = {};
+      state.transactions.filter((t) => t.type === 'expense')
+        .forEach((t) => (sums[t.category] = (sums[t.category] || 0) + t.amount));
+      const entries = Object.entries(sums).sort((a, b) => b[1] - a[1]);
+      const max = entries.length ? entries[0][1] : 1;
+
+      $('breakdown').innerHTML = entries.length
+        ? entries.map(([cat, val]) => `
+            <div>
+              <div class="flex justify-between text-sm"><span>${cat}</span><span>${fmt(val)}</span></div>
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                <div class="h-full bg-coin rounded-full" style="width:${(val / max) * 100}%"></div>
+              </div>
+            </div>`).join('')
+        : '<p class="text-sm text-gray-500">No expenses yet. Add one to see where your money goes.</p>';
+    }
+
+    function renderList() {
+      const q = $('search').value.toLowerCase();
+      const f = $('filter').value;
+      const items = state.transactions.filter((t) =>
+        (f === 'all' || t.type === f) &&
+        (t.title.toLowerCase().includes(q) || t.category.toLowerCase().includes(q))
+      );
+
+      if (!items.length) {
+        $('list').innerHTML = `<li class="py-6 text-center text-sm text-gray-500">${
+          state.transactions.length ? 'No matches. Try a different search or filter.' : 'Nothing here yet. Add your first transaction.'
+        }</li>`;
+        return;
+      }
+
+      $('list').innerHTML = items.map((t) => `
+        <li class="flex items-center justify-between py-3 gap-3 ${t.id === lastAddedId ? 'row-new' : ''}">
+          <div class="min-w-0">
+            <p class="font-medium truncate">${escapeHTML(t.title)}</p>
+            <p class="text-xs text-gray-500">${t.category} · ${new Date(t.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-semibold ${t.type === 'income' ? 'text-moss' : 'text-rust'}">
+              ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
+            </span>
+            <button class="delete-btn text-gray-500 hover:text-rust text-lg" data-id="${t.id}" aria-label="Delete ${escapeHTML(t.title)}">✕</button>
+          </div>
+        </li>`).join('');
+      lastAddedId = null;
+    }
+
+    // Prevent HTML injection from user-entered text
+    function escapeHTML(s) {
+      return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // ---------- Init ----------
+    $('date').valueAsDate = new Date();
+    if (state.limit) $('limit').value = state.limit;
+    render();
+  </script>
+</body>
+</html>
